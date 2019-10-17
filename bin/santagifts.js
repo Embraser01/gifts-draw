@@ -22,7 +22,7 @@ function showHelp() {
     ],
   };
 
-  console.log('Usage: gifts-draw <file>');
+  console.log('Usage: santagifts <file>');
   console.log('File example:');
   console.log(JSON.stringify(example, null, 4));
 }

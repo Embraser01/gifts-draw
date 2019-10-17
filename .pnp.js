@@ -22,7 +22,7 @@ function $$SETUP_STATE(hydrateRuntimeState) {
       "./.yarn/virtual/"
     ],
     "fallbackExclusionList": [
-      ["gifts-draw", ["workspace:."]]
+      ["santagifts", ["workspace:."]]
     ],
     "locationBlacklistData": [
     ],
@@ -378,11 +378,11 @@ function $$SETUP_STATE(hydrateRuntimeState) {
           ]
         }]
       ]],
-      ["gifts-draw", [
+      ["santagifts", [
         ["workspace:.", {
           "packageLocation": "./",
           "packageDependencies": [
-            ["gifts-draw", "workspace:."],
+            ["santagifts", "workspace:."],
             ["@sendgrid/mail", "npm:6.4.0"],
             ["dotenv", "npm:8.2.0"]
           ]
@@ -1067,7 +1067,7 @@ class NodeFS extends FakeFS_1.BasePortableFakeFS {
         return NodeFS.toPortablePath(this.realFs.readlinkSync(NodeFS.fromPortablePath(p)));
     }
     watch(p, a, b) {
-        return this.realFs.watch(NodeFS.fromPortablePath(p), 
+        return this.realFs.watch(NodeFS.fromPortablePath(p),
         // @ts-ignore
         a, b);
     }
@@ -1273,7 +1273,7 @@ class ProxiedFS extends FakeFS_1.FakeFS {
         return this.mapFromBase(this.baseFs.readlinkSync(this.mapToBase(p)));
     }
     watch(p, a, b) {
-        return this.baseFs.watch(this.mapToBase(p), 
+        return this.baseFs.watch(this.mapToBase(p),
         // @ts-ignore
         a, b);
     }
@@ -3021,7 +3021,7 @@ function fileSync(options) {
   const name = tmpNameSync(opts);
   var fd = fs.openSync(name, CREATE_FLAGS, opts.mode || FILE_MODE);
   if (opts.discardDescriptor) {
-    fs.closeSync(fd); 
+    fs.closeSync(fd);
     fd = undefined;
   }
 
@@ -4267,11 +4267,11 @@ class ZipOpenFS extends FakeFS_1.BasePortableFakeFS {
     }
     watch(p, a, b) {
         return this.makeCallSync(p, () => {
-            return this.baseFs.watch(p, 
+            return this.baseFs.watch(p,
             // @ts-ignore
             a, b);
         }, (zipFs, { subPath }) => {
-            return zipFs.watch(subPath, 
+            return zipFs.watch(subPath,
             // @ts-ignore
             a, b);
         });
