@@ -4,8 +4,19 @@
   "main": "index.js",
   "license": "MIT",
   "bin": "./bin/santagifts.js",
+  "homepage": "https://github.com/Embraser01/santagifts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Embraser01/santagifts.git"
+  },
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
     "@sendgrid/mail": "^6.4.0",
     "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "jest": "^24.9.0"
   }
 }

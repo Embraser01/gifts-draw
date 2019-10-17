@@ -41,3 +41,5 @@ With `config.json`
 
 Emails are sent through [sendgrid](https://sendgrid.com).You'll need a `SENDGRID_API_KEY`
 environnement variable to send mails.
+
+> You can set this env variable through a `.env` file in your working directory

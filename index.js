@@ -2,8 +2,11 @@ require('dotenv').config();
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const get = (obj, path, defaultValue) => path.split('.')
-  .reduce((acc, part) => acc ? acc[part] : undefined, obj) || defaultValue;
+const get = (obj, path, defaultValue) => {
+  const res = path.split('.')
+    .reduce((acc, part) => acc ? acc[part] : acc, obj);
+  return res === undefined ? defaultValue : res;
+};
 
 /**
  *
@@ -77,3 +80,9 @@ async function main(list, { sendEmails = false, log = false, subject, content, f
 }
 
 module.exports = main;
+module.exports.__TESTS__ = {
+  get,
+  createEmails,
+  shuffleList,
+  createDirectedPairs,
+};
