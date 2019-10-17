@@ -62,8 +62,8 @@ function logPairs(pairs) {
     .forEach(str => console.log(str));
 }
 
-async function main(list, { sendEmails = false, log = false }) {
-  const shuffled = shuffleList(PEOPLE);
+async function main(list, { sendEmails = false, log = false, subject, content, from }) {
+  const shuffled = shuffleList(list);
   const pairs = createDirectedPairs(shuffled);
 
   if (log) {
@@ -71,12 +71,8 @@ async function main(list, { sendEmails = false, log = false }) {
   }
 
   if (sendEmails) {
-    const emails = createEmails(pairs, {
-      subject: 'Test cadeau',
-      content: 'Salut {src.name} Tu devras faire un cadeau à {dest.name} (mail: {dest.email})',
-    });
-    console.log(emails);
-    // await sgMail.send(emails);
+    const emails = createEmails(pairs, { subject, content });
+    await sgMail.send(emails);
   }
 }
 
