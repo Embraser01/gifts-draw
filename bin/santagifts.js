@@ -12,7 +12,7 @@ function showHelp() {
     subject: '(string) e.g.: "Secret-santa"',
     content: '(string) e.g.: "Hey {src.name}, this year you will make a gift to {dest.name} (email: {dest.email})"',
     from: 'no-reply@example.com',
-    sendMail: '(boolean): Send emails to each participants (require the SENDGRID_API_KEY)',
+    sendMail: '(boolean): Send emails to each participants (require the `SENDGRID_API_KEY`)',
     logToStdout: '(boolean): Whether to log to stdout results (disable per default if --send)',
     people: [
       { name: 'John', email: 'john@example.com' },

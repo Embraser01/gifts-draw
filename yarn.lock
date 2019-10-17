@@ -298,15 +298,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gifts-draw@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "gifts-draw@workspace:."
-  dependencies:
-    "@sendgrid/mail": "npm:^6.4.0"
-    dotenv: "npm:^8.2.0"
-  languageName: unknown
-  linkType: soft
-
 "har-schema@npm:^2.0.0":
   version: 2.0.0
   resolution: "har-schema@npm:2.0.0"
@@ -495,6 +486,17 @@ __metadata:
   checksum: cfd3f4d7dc37db071c3b36c8e4315e3912e70f1a44c87936cafb6b3b15af362893ca02da703398fbbc299c1599fa49fca9ddda41ffd347adda417f988848dcf2
   languageName: node
   linkType: hard
+
+"santagifts@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "santagifts@workspace:."
+  dependencies:
+    "@sendgrid/mail": "npm:^6.4.0"
+    dotenv: "npm:^8.2.0"
+  bin:
+    santagifts: ./bin/santagifts.js
+  languageName: unknown
+  linkType: soft
 
 "sshpk@npm:^1.7.0":
   version: 1.16.1
