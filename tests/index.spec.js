@@ -1,4 +1,4 @@
-const { get, createDirectedPairs, shuffleList, createEmails } = require('../index').__TESTS__;
+const { get, createDirectedPairs, shuffleList, createEmails, resolveCouples } = require('../index').__TESTS__;
 
 describe('get', () => {
   const obj = {
@@ -84,5 +84,32 @@ describe('createEmails', () => {
     expect(emails[0]).toMatchObject({
       to: 'test@example.com',
     });
+  });
+});
+
+describe('resolveCouples', () => {
+  it('should not have following couples', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }];
+    const rules = [[1, 2]];
+
+    const newList = resolveCouples(list, rules);
+
+    expect(newList).toEqual([{ name: 1 }, { name: 3 }, { name: 2 }, { name: 4 }]);
+  });
+
+  it('should handle end of array case', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }];
+    const rules = [[1, 4]];
+
+    const newList = resolveCouples(list, rules);
+
+    expect(newList).toEqual([{ name: 2 }, { name: 1 }, { name: 3 }, { name: 4 }]);
+  });
+
+  it('should throw if rule have unknown name', () => {
+    const list = [{ name: 1 }, { name: 2 }];
+    const rules = [[1, 7]];
+
+    expect(() => resolveCouples(list, rules)).toThrowError();
   });
 });

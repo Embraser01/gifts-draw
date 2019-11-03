@@ -63,7 +63,7 @@ if (!config.subject || !config.content || !config.people) {
   process.exit(1);
 }
 
-const { people, content, subject, sendEmails = false, logToStdout = !sendEmails, from } = config;
+const { people, content, subject, sendEmails = false, logToStdout = !sendEmails, from, rules } = config;
 
 const missingNames = getMissingNames(people);
 if (missingNames.length) {
@@ -85,4 +85,4 @@ if (sendEmails) {
   }
 }
 
-main(people, { sendEmails, log: logToStdout, subject, content, from }).catch(e => console.error(e));
+main(people, { sendEmails, log: logToStdout, subject, content, from, rules }).catch(e => console.error(e));

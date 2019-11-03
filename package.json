@@ -10,7 +10,8 @@
     "url": "https://github.com/Embraser01/santagifts.git"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "bin/santagifts.js"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.4.0",

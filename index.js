@@ -46,6 +46,36 @@ function shuffleList(originalList) {
 }
 
 /**
+ * Take a list and separate couples.
+ *
+ * @param list {Array<Object>} Original list
+ * @param rules {Array<Array<string>>} Array of pairs (with name as Id)
+ */
+function resolveCouples(list, rules) {
+  const newList = [...list];
+
+  for (const [couple1, couple2] of rules) {
+    const idx1 = list.findIndex(({ name }) => name === couple1);
+    const idx2 = list.findIndex(({ name }) => name === couple2);
+
+    if (idx1 === -1 || idx2 === -1) {
+      throw new Error(`Unable to find couple (${couple1}, ${couple2})`);
+    }
+
+    if (Math.abs(idx1 - idx2) === 1) {
+      const idxMax = Math.max(idx1, idx2);
+      const idxDest = idxMax === (list.length - 1) ? 0 : idxMax + 1;
+      [newList[idxMax], newList[idxDest]] = [newList[idxDest], newList[idxMax]];
+    }
+
+    if (Math.abs(idx1 - idx2) === (list.length - 1)) {
+      [newList[0], newList[1]] = [newList[1], newList[0]];
+    }
+  }
+  return newList;
+}
+
+/**
  * Return pairs.
  *
  * @param list {Array<Object>}
@@ -65,8 +95,13 @@ function logPairs(pairs) {
     .forEach(str => console.log(str));
 }
 
-async function main(list, { sendEmails = false, log = false, subject, content, from }) {
-  const shuffled = shuffleList(list);
+async function main(list, { sendEmails = false, log = false, subject, content, from, rules }) {
+  let shuffled = shuffleList(list);
+
+  if (rules) {
+    shuffled = resolveCouples(shuffled, rules);
+  }
+
   const pairs = createDirectedPairs(shuffled);
 
   if (log) {
@@ -85,4 +120,5 @@ module.exports.__TESTS__ = {
   createEmails,
   shuffleList,
   createDirectedPairs,
+  resolveCouples,
 };
