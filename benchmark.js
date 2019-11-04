@@ -1,16 +1,16 @@
 const { createDirectedPairs, shuffleList, resolveCouples } = require('./index').__TESTS__;
 
-const TIMES = 10000;
+const TIMES = 100_000;
 const LIST = [
-  { 'name': 'Ted' },
-  { 'name': 'Lenard' },
-  { 'name': 'Armida' },
-  { 'name': 'Enedina' },
-  { 'name': 'Aleida' },
-  { 'name': 'Mariella' },
-  { 'name': 'Ermelinda' },
-  { 'name': 'Margit' },
-  { 'name': 'Terrell' },
+  { name: 'Ted' },
+  { name: 'Lenard' },
+  { name: 'Armida' },
+  { name: 'Enedina' },
+  { name: 'Aleida' },
+  { name: 'Mariella' },
+  { name: 'Ermelinda' },
+  { name: 'Margit' },
+  { name: 'Terrell' },
 ];
 const RULES = [
   ['Ted', 'Lenard'],
@@ -19,36 +19,40 @@ const RULES = [
   ['Ermelinda', 'Margit'],
 ];
 
-const results = new Map();
 
-function test(followRules = false) {
-  let shuffled = shuffleList(LIST);
+function test(list, rules, resMap, followRules = false) {
+  let shuffled = shuffleList(list);
 
   if (followRules) {
-    shuffled = resolveCouples(shuffled, RULES);
+    shuffled = resolveCouples(shuffled, rules);
   }
 
   const pairs = createDirectedPairs(shuffled);
 
   pairs.forEach(p => {
     const key = `${p[0].name}->${p[1].name}`;
-    if (!results.has(key)) {
-      results.set(key, 0);
+    if (!resMap.has(key)) {
+      resMap.set(key, 0);
     }
-    results.set(key, results.get(key) + 1);
+    resMap.set(key, resMap.get(key) + 1);
   });
 }
 
-
-for (let i = 0; i < TIMES; i++) {
-  test(false);
-}
-
-const formattedRes = [...results.entries()]
+const formattedRes = (results) => [...results.entries()]
   .map(([key, val]) => [key, val / TIMES * 100])
   .map(([key, val]) => [key, val.toFixed(1)])
   .sort((a, b) => b[1] - a[1])
   .map(([key, val]) => [key, `${val}%`]);
 
-console.log(formattedRes);
-console.log(formattedRes.length);
+const resNoRules = new Map();
+for (let i = 0; i < TIMES; i++) {
+  test(LIST, RULES, resNoRules, false);
+}
+
+const resRules = new Map();
+for (let i = 0; i < TIMES; i++) {
+  test(LIST, RULES, resRules, true);
+}
+
+console.log(formattedRes(resNoRules).length, formattedRes(resNoRules));
+console.log(formattedRes(resRules).length, formattedRes(resRules));
