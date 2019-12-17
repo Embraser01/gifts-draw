@@ -1,4 +1,13 @@
-const { get, createDirectedPairs, shuffleList, createEmails, resolveCouples } = require('../index').__TESTS__;
+const {
+  get,
+  createDirectedPairs,
+  createEmails,
+  createNode,
+  findLongestPaths,
+  applyExclusions,
+  initGraph,
+  applyOrientedRules,
+} = require('../index').__TESTS__;
 
 describe('get', () => {
   const obj = {
@@ -34,18 +43,6 @@ describe('createDirectedPairs', () => {
 
     expect.assertions(length);
     pairs.forEach(([src, dest]) => expect((src + 1) % length).toBe(dest));
-  });
-});
-
-describe('shuffleList', () => {
-  it('should shuffle list', () => {
-    const list = [0, 1, 2, 3, 4, 5, 6, 7];
-
-    const shuffle = shuffleList(list);
-
-    expect(shuffle).not.toBe(list);
-    expect(shuffle).not.toEqual(list);
-    expect(list.length).toEqual(shuffle.length);
   });
 });
 
@@ -87,29 +84,90 @@ describe('createEmails', () => {
   });
 });
 
-describe('resolveCouples', () => {
-  it('should not have following couples', () => {
+describe('initGraph', () => {
+  it('should create a graph with all elements from the list', () => {
     const list = [{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }];
+
+    const graph = initGraph(list);
+
+    expect(graph.size).toBe(list.length);
+    expect(Array.from(graph.keys())).toEqual(expect.arrayContaining(list.map(l => l.name)));
+  });
+
+  it('should create all candidates for each node', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }];
+
+    const graph = initGraph(list);
+
+    expect.assertions(graph.size * 2);
+
+    for (const n of graph.values()) {
+      expect(n.candidates.size).toBe(list.length - 1);
+      expect(n.candidates.has(n)).toBe(false);
+    }
+  });
+});
+
+describe('applyOrientedRules', () => {
+  it('should apply rules correctly', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }];
     const rules = [[1, 2]];
 
-    const newList = resolveCouples(list, rules);
+    const graph = initGraph(list);
 
-    expect(newList).toEqual([{ name: 1 }, { name: 3 }, { name: 2 }, { name: 4 }]);
+    applyOrientedRules(graph, rules);
+
+    expect(Array
+      .from(graph.get(1).candidates.keys())
+      .map(n => n.name),
+    ).toEqual([3]);
   });
 
-  it('should handle end of array case', () => {
-    const list = [{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }];
-    const rules = [[1, 4]];
+  it('should apply multiple rules', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }];
+    const rules = [[1, 2], [1, 3]];
 
-    const newList = resolveCouples(list, rules);
+    const graph = initGraph(list);
 
-    expect(newList).toEqual([{ name: 2 }, { name: 1 }, { name: 3 }, { name: 4 }]);
+    applyOrientedRules(graph, rules);
+
+    expect(graph.get(1).candidates.size).toBe(0);
+  });
+});
+
+describe('applyExclusions', () => {
+  it('should apply simple exclusions correctly', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }];
+    const rules = [[1, 2]];
+
+    const graph = initGraph(list);
+
+    applyExclusions(graph, rules);
+
+    expect(Array
+      .from(graph.get(1).candidates.keys())
+      .map(n => n.name),
+    ).toEqual([3]);
+
+    expect(Array
+      .from(graph.get(2).candidates.keys())
+      .map(n => n.name),
+    ).toEqual([3]);
   });
 
-  it('should throw if rule have unknown name', () => {
-    const list = [{ name: 1 }, { name: 2 }];
-    const rules = [[1, 7]];
+  it('should apply complex exclusions', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }];
+    const rules = [[1, 2, 3]];
 
-    expect(() => resolveCouples(list, rules)).toThrowError();
+    const graph = initGraph(list);
+
+    applyExclusions(graph, rules);
+
+    expect(graph.get(1).candidates.size).toBe(0);
+    expect(graph.get(2).candidates.size).toBe(0);
+    expect(graph.get(3).candidates.size).toBe(0);
   });
+});
+
+describe('findLongestPaths', () => {
 });

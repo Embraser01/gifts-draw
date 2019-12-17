@@ -9,6 +9,14 @@ const get = (obj, path, defaultValue) => {
 };
 
 /**
+ * @typedef Node
+ * @type {object}
+ * @property {string} email - Email
+ * @property {string} name - Name.
+ * @property {Set<Node>} candidates - Edges.
+ */
+
+/**
  *
  * @param list
  * @param subject
@@ -31,57 +39,146 @@ function createEmails(list, {
 }
 
 /**
- * Return a new list shuffled.
- *
- * @param originalList {Array<Object>}
- * @return {*}
- */
-function shuffleList(originalList) {
-  const newList = [...originalList];
-  for (let i = newList.length - 1; i > 0; i--) {
-    const rand = Math.floor(Math.random() * (i + 1));
-    [newList[i], newList[rand]] = [newList[rand], newList[i]];
-  }
-  return newList;
-}
-
-/**
- * Take a list and separate couples.
- *
- * @param list {Array<Object>} Original list
- * @param rules {Array<Array<string>>} Array of pairs (with name as Id)
- */
-function resolveCouples(list, rules) {
-  const newList = [...list];
-
-  for (const [couple1, couple2] of rules) {
-    const idx1 = list.findIndex(({ name }) => name === couple1);
-    const idx2 = list.findIndex(({ name }) => name === couple2);
-
-    if (idx1 === -1 || idx2 === -1) {
-      throw new Error(`Unable to find couple (${couple1}, ${couple2})`);
-    }
-
-    if (Math.abs(idx1 - idx2) === 1) {
-      const idxMax = Math.max(idx1, idx2);
-      const idxDest = idxMax === (list.length - 1) ? 0 : idxMax + 1;
-      [newList[idxMax], newList[idxDest]] = [newList[idxDest], newList[idxMax]];
-    }
-
-    if (Math.abs(idx1 - idx2) === (list.length - 1)) {
-      [newList[0], newList[1]] = [newList[1], newList[0]];
-    }
-  }
-  return newList;
-}
-
-/**
  * Return pairs.
  *
  * @param list {Array<Object>}
  */
 function createDirectedPairs(list) {
   return list.map((p, i, arr) => [p, arr[i + 1] || arr[0]]);
+}
+
+
+/**
+ * Create a node.
+ * @param name
+ * @param email
+ * @return {Node}
+ */
+const createNode = ({ name, email }) => ({
+  name,
+  email,
+  candidates: new Set(),
+});
+
+/**
+ *
+ * @param list {Array<{name: string, email?: string}>}
+ * @return {Map<string, {}>}
+ */
+function initGraph(list) {
+  const graph = new Map();
+
+  list
+    .sort(() => 0.5 - Math.random())
+    .forEach(item => graph.set(item.name, createNode(item)));
+
+  const allCandidates = Array.from(graph.values());
+
+  for (const node of graph.values()) {
+    allCandidates
+      .filter(n => node !== n)
+      .forEach(c => node.candidates.add(c));
+  }
+
+  return graph;
+}
+
+/**
+ *
+ * @param graph {Map<string, Node>}
+ * @param rules {Array<[string, string]>}
+ */
+function applyOrientedRules(graph, rules) {
+  for (const [src, dest] of rules) {
+    const srcNode = graph.get(src);
+    const destNode = graph.get(dest);
+
+    if (!srcNode || !destNode) {
+      throw new Error(`Unable to find persons (${src}, ${dest}).`);
+    }
+
+    srcNode.candidates.delete(destNode);
+  }
+}
+
+/**
+ * Apply exclusion rules.
+ * For each rule, it removes link between each element.
+ *
+ * @param graph {Map<string, Node>}
+ * @param exclusions {Array<Array<string>>}
+ */
+function applyExclusions(graph, exclusions) {
+  for (const exclusion of exclusions) {
+    const nodes = exclusion.map(e => graph.get(e));
+
+    if (nodes.includes(undefined)) {
+      throw new Error(`One or more persons could not be found in (${exclusion.join(', ')}).`);
+    }
+
+    nodes.forEach(origin => nodes
+      .filter(n => n !== origin)
+      .forEach(n => origin.candidates.delete(n)),
+    );
+  }
+}
+
+/**
+ * Find a path in the graph
+ *
+ * @param graph {Map<string, Node>}
+ * @param maxPath {number}
+ */
+function findLongestPaths(graph, maxPath = 500) {
+  const paths = [];
+  const nodes = Array.from(graph.values()).sort(() => 0.5 - Math.random());
+  // Add some noise everywhere
+  nodes.forEach(n => n.candidates = new Map(Array.from(n.candidates.entries()).sort(() => 0.5 - Math.random())));
+
+  const node = nodes[Math.floor(Math.random() * nodes.length)];
+  const visited = new Set();
+  const path = [];
+  let pathIdx = 0;
+  let nPath = 0;
+
+  const findAllPath = (curr, end, skipVisited) => {
+    if (!skipVisited) visited.add(curr);
+    path[pathIdx] = curr;
+    pathIdx++;
+
+    if (curr === end && pathIdx > 1) {
+      if (pathIdx === nodes.length + 1) {
+        paths.push([...path.slice(0, nodes.length)]);
+        nPath++;
+
+        if (nPath > maxPath) {
+          throw new Error('To many paths');
+        }
+      }
+    } else if (pathIdx === 0) {
+      return;
+    } else {
+      for (const n of curr.candidates.values()) {
+        if (!visited.has(n)) {
+          findAllPath(n, end);
+        }
+      }
+    }
+
+    pathIdx--;
+    visited.delete(curr);
+  };
+
+  // First one should not be added to visited because we
+  // search for a cyclic path.
+  try {
+    findAllPath(node, node, true);
+  } catch (e) {
+    // ignored
+  }
+
+
+  return paths[Math.floor(Math.random() * paths.length)];
 }
 
 /**
@@ -95,14 +192,36 @@ function logPairs(pairs) {
     .forEach(str => console.log(str));
 }
 
-async function main(list, { sendEmails = false, log = false, subject, content, from, rules }) {
-  let shuffled = shuffleList(list);
+
+async function main(
+  list,
+  {
+    sendEmails = false,
+    log = false,
+    subject,
+    content,
+    from,
+    rules,
+    exclusions,
+  },
+) {
+  const graph = initGraph(list);
 
   if (rules) {
-    shuffled = resolveCouples(shuffled, rules);
+    applyOrientedRules(graph, rules);
   }
 
-  const pairs = createDirectedPairs(shuffled);
+  if (exclusions) {
+    applyExclusions(graph, exclusions);
+  }
+
+  const path = findLongestPaths(graph);
+
+  if (!path) {
+    throw new Error('No combinaison was found, try to remove some rules');
+  }
+
+  const pairs = createDirectedPairs(path);
 
   if (log) {
     logPairs(pairs);
@@ -117,8 +236,11 @@ async function main(list, { sendEmails = false, log = false, subject, content, f
 module.exports = main;
 module.exports.__TESTS__ = {
   get,
+  applyOrientedRules,
+  applyExclusions,
+  findLongestPaths,
+  initGraph,
+  createNode,
   createEmails,
-  shuffleList,
   createDirectedPairs,
-  resolveCouples,
 };
