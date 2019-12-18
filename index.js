@@ -8,6 +8,15 @@ const get = (obj, path, defaultValue) => {
   return res === undefined ? defaultValue : res;
 };
 
+const shuffleArray = (array) => {
+  array = [...array];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
 /**
  * @typedef Node
  * @type {object}
@@ -68,9 +77,7 @@ const createNode = ({ name, email }) => ({
 function initGraph(list) {
   const graph = new Map();
 
-  list
-    .sort(() => 0.5 - Math.random())
-    .forEach(item => graph.set(item.name, createNode(item)));
+  shuffleArray(list).forEach(item => graph.set(item.name, createNode(item)));
 
   const allCandidates = Array.from(graph.values());
 
@@ -131,11 +138,9 @@ function applyExclusions(graph, exclusions) {
  */
 function findLongestPaths(graph, maxPath = 500) {
   const paths = [];
-  const nodes = Array.from(graph.values()).sort(() => 0.5 - Math.random());
-  // Add some noise everywhere
-  nodes.forEach(n => n.candidates = new Map(Array.from(n.candidates.entries()).sort(() => 0.5 - Math.random())));
+  const nodes = Array.from(graph.values());
 
-  const node = nodes[Math.floor(Math.random() * nodes.length)];
+  const [node] = nodes;
   const visited = new Set();
   const path = [];
   let pathIdx = 0;
@@ -184,6 +189,7 @@ function findLongestPaths(graph, maxPath = 500) {
  *
  * @param pairs {Array<Object>}
  */
+
 /* istanbul ignore next */
 function logPairs(pairs) {
   pairs

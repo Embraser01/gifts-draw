@@ -40,7 +40,11 @@ function testFor(n) {
   }
 
   console.log(`For ${n} persons: ${BigInt.asIntN(64, totalNanoseconds / BigInt(1e6) / BigInt(TIMES))}ms with ${Math.ceil(totalPath / TIMES * 100)}%`);
-  console.log(formattedRes(resMap));
+  const res = formattedRes(resMap);
+  const first = res[0];
+  const last = res[res.length - 1];
+
+  console.log([first, last]);
 }
 
 console.time('Processing');
