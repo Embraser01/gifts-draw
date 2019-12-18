@@ -155,8 +155,6 @@ function findLongestPaths(graph, maxPath = 500) {
           throw new Error('To many paths');
         }
       }
-    } else if (pathIdx === 0) {
-      return;
     } else {
       for (const n of curr.candidates.values()) {
         if (!visited.has(n)) {
@@ -186,13 +184,14 @@ function findLongestPaths(graph, maxPath = 500) {
  *
  * @param pairs {Array<Object>}
  */
+/* istanbul ignore next */
 function logPairs(pairs) {
   pairs
     .map(([src, dest]) => `${src.name} offre à ${dest.name}`)
     .forEach(str => console.log(str));
 }
 
-
+/* istanbul ignore next */
 async function main(
   list,
   {

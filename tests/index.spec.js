@@ -32,6 +32,10 @@ describe('get', () => {
   it.each(TESTS)('should find %s equal %p (default %p)', (path, expected, defaultValue) => {
     expect(get(obj, path, defaultValue)).toBe(expected);
   });
+
+  it('should find', () => {
+    expect(get(null, 'a.b.c')).toBe(null);
+  });
 });
 
 describe('createDirectedPairs', () => {
@@ -84,6 +88,14 @@ describe('createEmails', () => {
   });
 });
 
+describe('createNode', () => {
+  it('should create a simple node', () => {
+    const node = createNode({ name: 2 });
+
+    expect(node).toEqual({ name: 2, candidates: new Set() });
+  });
+});
+
 describe('initGraph', () => {
   it('should create a graph with all elements from the list', () => {
     const list = [{ name: 1 }, { name: 2 }, { name: 3 }, { name: 4 }];
@@ -133,6 +145,15 @@ describe('applyOrientedRules', () => {
 
     expect(graph.get(1).candidates.size).toBe(0);
   });
+
+  it('should throw if no consistent data', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }];
+    const rules = [[1, 2], [1, 4]];
+
+    const graph = initGraph(list);
+
+    expect(() => applyOrientedRules(graph, rules)).toThrowError(Error);
+  });
 });
 
 describe('applyExclusions', () => {
@@ -167,7 +188,56 @@ describe('applyExclusions', () => {
     expect(graph.get(2).candidates.size).toBe(0);
     expect(graph.get(3).candidates.size).toBe(0);
   });
+
+  it('should throw if no consistent data', () => {
+    const list = [{ name: 1 }, { name: 2 }, { name: 3 }];
+    const rules = [[1, 2, 4]];
+
+    const graph = initGraph(list);
+
+    expect(() => applyExclusions(graph, rules)).toThrowError(Error);
+  });
 });
 
 describe('findLongestPaths', () => {
+  it('should find a path', () => {
+    const a = createNode({ name: 'a' });
+    const b = createNode({ name: 'b' });
+    const c = createNode({ name: 'c' });
+
+    const graph = new Map([a, b, c].map(n => [n.name, n]));
+
+    a.candidates.add(b);
+    b.candidates.add(c);
+    c.candidates.add(a);
+
+    const path = findLongestPaths(graph);
+
+    expect(path).toHaveLength(3);
+    expect(path).toEqual(expect.arrayContaining([a, b, c]));
+  });
+
+  it('should return undefined if no solution', () => {
+    const a = createNode({ name: 'a' });
+    const b = createNode({ name: 'b' });
+    const c = createNode({ name: 'c' });
+
+    const graph = new Map([a, b, c].map(n => [n.name, n]));
+
+    a.candidates.add(b);
+    b.candidates.add(c);
+
+    const path = findLongestPaths(graph);
+
+    expect(path).not.toBeDefined();
+  });
+
+  it('should handle more than 20 nodes', () => {
+    const list = Array.from({ length: 100 }, (_, idx) => ({ name: idx }));
+    const graph = initGraph(list);
+
+    const path = findLongestPaths(graph);
+
+    expect(path).toHaveLength(list.length);
+  });
 });
