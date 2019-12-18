@@ -1,33 +1,15 @@
-const { createDirectedPairs, shuffleList, resolveCouples } = require('./index').__TESTS__;
+const { initGraph, findLongestPaths, createDirectedPairs } = require('./index').__TESTS__;
 
-const TIMES = 100_000;
-const LIST = [
-  { name: 'Ted' },
-  { name: 'Lenard' },
-  { name: 'Armida' },
-  { name: 'Enedina' },
-  { name: 'Aleida' },
-  { name: 'Mariella' },
-  { name: 'Ermelinda' },
-  { name: 'Margit' },
-  { name: 'Terrell' },
-];
-const RULES = [
-  ['Ted', 'Lenard'],
-  ['Armida', 'Enedina'],
-  ['Aleida', 'Mariella'],
-  ['Ermelinda', 'Margit'],
-];
+const TIMES = 1000;
+const createList = size => Array.from({ length: size }, (_, idx) => ({ name: `Person ${idx}` }));
 
+function time(list, resMap) {
+  const graph = initGraph(list);
+  const start = process.hrtime.bigint();
 
-function test(list, rules, resMap, followRules = false) {
-  let shuffled = shuffleList(list);
+  const path = findLongestPaths(graph);
 
-  if (followRules) {
-    shuffled = resolveCouples(shuffled, rules);
-  }
-
-  const pairs = createDirectedPairs(shuffled);
+  const pairs = createDirectedPairs(path);
 
   pairs.forEach(p => {
     const key = `${p[0].name}->${p[1].name}`;
@@ -36,6 +18,8 @@ function test(list, rules, resMap, followRules = false) {
     }
     resMap.set(key, resMap.get(key) + 1);
   });
+
+  return [process.hrtime.bigint() - start, !!path];
 }
 
 const formattedRes = (results) => [...results.entries()]
@@ -44,15 +28,29 @@ const formattedRes = (results) => [...results.entries()]
   .sort((a, b) => b[1] - a[1])
   .map(([key, val]) => [key, `${val}%`]);
 
-const resNoRules = new Map();
-for (let i = 0; i < TIMES; i++) {
-  test(LIST, RULES, resNoRules, false);
+function testFor(n) {
+  let totalNanoseconds = 0n;
+  let totalPath = 0;
+
+  const resMap = new Map();
+  for (let i = 0; i < TIMES; i++) {
+    const [ns, hasPath] = time(createList(n), resMap);
+    totalNanoseconds += ns;
+    if (hasPath) totalPath++;
+  }
+
+  console.log(`For ${n} persons: ${BigInt.asIntN(64, totalNanoseconds / BigInt(1e6) / BigInt(TIMES))}ms with ${Math.ceil(totalPath / TIMES * 100)}%`);
+  const res = formattedRes(resMap);
+  const first = res[0];
+  const last = res[res.length - 1];
+
+  console.log([first, last]);
 }
 
-const resRules = new Map();
-for (let i = 0; i < TIMES; i++) {
-  test(LIST, RULES, resRules, true);
-}
-
-console.log(formattedRes(resNoRules).length, formattedRes(resNoRules));
-console.log(formattedRes(resRules).length, formattedRes(resRules));
+console.time('Processing');
+testFor(3);
+testFor(9);
+testFor(25);
+testFor(40);
+testFor(50);
+console.timeEnd('Processing');
