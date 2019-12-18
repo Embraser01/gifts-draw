@@ -232,8 +232,8 @@ describe('findLongestPaths', () => {
     expect(path).not.toBeDefined();
   });
 
-  it('should handle more than 20 nodes', () => {
-    const list = Array.from({ length: 100 }, (_, idx) => ({ name: idx }));
+  it('should handle high number of nodes', () => {
+    const list = Array.from({ length: 1000 }, (_, idx) => ({ name: idx }));
     const graph = initGraph(list);
 
     const path = findLongestPaths(graph);
