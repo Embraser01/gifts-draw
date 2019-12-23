@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const main = require('../index');
+const { createDraw } = require('../index');
 
 const getMissingEmails = list => list.filter(p => !p.email);
 const getMissingNames = list => list.filter(p => !p.name);
@@ -19,6 +19,12 @@ function showHelp() {
       { name: 'Marc', email: 'marc@example.com' },
       { name: 'Lea', email: 'lea@example.com' },
       { name: 'Ann', email: 'ann@example.com' },
+    ],
+    exclusions: [
+      ['John', 'Ann'],
+    ],
+    rules: [
+      ['Marc', 'John'],
     ],
   };
 
@@ -94,4 +100,5 @@ if (sendEmails) {
   }
 }
 
-main(people, { sendEmails, log: logToStdout, subject, content, from, rules, exclusions }).catch(e => console.error(e));
+createDraw(people, { sendEmails, log: logToStdout, subject, content, from, rules, exclusions })
+  .catch(e => console.error(e));

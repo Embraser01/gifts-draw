@@ -10,7 +10,7 @@ yarn dlx santagifts config.json
 ```
 
 With `config.json`
-```json
+```json5
 {
   "subject": "Secret-santa",
   "content": "Hey {src.name}, this year you will make a gift to {dest.name} (email: {dest.email})",
@@ -33,13 +33,23 @@ With `config.json`
       "name": "Ann",
       "email": "ann@example.com"
     }
+  ],
+  // Exclusions prevent people from receiving/sending other people
+  "exclusions": [
+    // Here, John, Lea and Ann will never pick each others
+    ["John", "Lea", "Ann"]
+  ],
+  // Rules is a simpler system where you prevent someone to pick someone else
+  "rules": [
+    // Here, Marc will never pick Lea
+    ["Marc", "Lea"]
   ]
 }
 ```
 
 ## Sendgrid
 
-Emails are sent through [sendgrid](https://sendgrid.com).You'll need a `SENDGRID_API_KEY`
+Emails are sent through [sendgrid](https://sendgrid.com). You'll need a `SENDGRID_API_KEY`
 environnement variable to send mails.
 
 > You can set this env variable through a `.env` file in your working directory

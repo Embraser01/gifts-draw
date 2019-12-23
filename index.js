@@ -198,7 +198,7 @@ function logPairs(pairs) {
 }
 
 /* istanbul ignore next */
-async function main(
+async function createDraw(
   list,
   {
     sendEmails = false,
@@ -233,13 +233,12 @@ async function main(
   }
 
   if (sendEmails) {
-    const emails = createEmails(pairs, { subject, content });
+    const emails = createEmails(pairs, { subject, content, from });
     await sgMail.send(emails);
   }
 }
 
-module.exports = main;
-module.exports.__TESTS__ = {
+module.exports = {
   get,
   applyOrientedRules,
   applyExclusions,
@@ -248,4 +247,5 @@ module.exports.__TESTS__ = {
   createNode,
   createEmails,
   createDirectedPairs,
+  createDraw,
 };

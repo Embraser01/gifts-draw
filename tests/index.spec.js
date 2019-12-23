@@ -7,7 +7,7 @@ const {
   applyExclusions,
   initGraph,
   applyOrientedRules,
-} = require('../index').__TESTS__;
+} = require('../index');
 
 describe('get', () => {
   const obj = {

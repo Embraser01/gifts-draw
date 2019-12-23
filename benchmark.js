@@ -1,4 +1,4 @@
-const { initGraph, findLongestPaths, createDirectedPairs } = require('./index').__TESTS__;
+const { initGraph, findLongestPaths, createDirectedPairs } = require('./index');
 
 const TIMES = 1000;
 const createList = size => Array.from({ length: size }, (_, idx) => ({ name: `Person ${idx}` }));

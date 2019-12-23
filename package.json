@@ -1,6 +1,6 @@
 {
   "name": "santagifts",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "main": "index.js",
   "license": "MIT",
   "bin": "./bin/santagifts.js",
@@ -9,6 +9,10 @@
     "type": "git",
     "url": "https://github.com/Embraser01/santagifts.git"
   },
+  "files": [
+    "index.js",
+    "bin/santagifts.js"
+  ],
   "scripts": {
     "test": "jest",
     "start": "bin/santagifts.js"
