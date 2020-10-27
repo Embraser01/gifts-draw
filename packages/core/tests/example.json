@@ -1,0 +1,24 @@
+{
+  "subject": "Secret-santa",
+  "content": "Hey {src.name}, this year you will make a gift to {dest.name} (email: {dest.email})",
+  "sendEmails": true,
+  "logToStdout": false,
+  "people": [
+    {
+      "name": "John",
+      "email": "john@example.com"
+    },
+    {
+      "name": "Marc",
+      "email": "marc@example.com"
+    },
+    {
+      "name": "Lea",
+      "email": "lea@example.com"
+    },
+    {
+      "name": "Ann",
+      "email": "ann@example.com"
+    }
+  ]
+}

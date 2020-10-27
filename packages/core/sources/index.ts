@@ -1,85 +1,48 @@
-require('dotenv').config();
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-const get = (obj, path, defaultValue) => {
-  const res = path.split('.')
-    .reduce((acc, part) => acc ? acc[part] : acc, obj);
-  return res === undefined ? defaultValue : res;
+export type Node = {
+  name: string,
+  email: string,
+  candidates: Set<any>,
 };
+export type Graph = Map<string, Node>;
+export type Rules = Array<[string, string]>;
+export type Path = Array<Node>;
 
-const shuffleArray = (array) => {
+
+export function shuffleArray<T>(array: Array<T>): Array<T> {
   array = [...array];
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
-};
-
-/**
- * @typedef Node
- * @type {object}
- * @property {string} email - Email
- * @property {string} name - Name.
- * @property {Set<Node>} candidates - Edges.
- */
-
-/**
- *
- * @param list
- * @param subject
- * @param content
- * @param from
- * @returns {*}
- */
-function createEmails(list, {
-  subject,
-  content,
-  from = 'no-reply@example.com',
-}) {
-  const INTERPOLATION_TOKEN = /{\s*([.\w]+)\s*}/g;
-  return list.map(([src, dest]) => ({
-    to: src.email,
-    from,
-    subject: subject.replace(INTERPOLATION_TOKEN, (_, p) => get({ src, dest }, p)),
-    text: content.replace(INTERPOLATION_TOKEN, (_, p) => get({ src, dest }, p)),
-  }));
 }
 
 /**
  * Return pairs.
- *
- * @param list {Array<Object>}
  */
-function createDirectedPairs(list) {
+export function createDirectedPairs<T>(list: Array<T>): Array<[T, T]> {
   return list.map((p, i, arr) => [p, arr[i + 1] || arr[0]]);
 }
 
 
 /**
  * Create a node.
- * @param name
- * @param email
- * @return {Node}
  */
-const createNode = ({ name, email }) => ({
-  name,
-  email,
-  candidates: new Set(),
-});
+export function createNode({ name, email }: { name: string; email: string }): Node {
+  return {
+    name,
+    email,
+    candidates: new Set(),
+  };
+}
 
 /**
- *
- * @param list {Array<{name: string, email?: string}>}
- * @return {Map<string, {}>}
+ * Initialize graph
  */
-function initGraph(list) {
-  const graph = new Map();
+export function initGraph(list: Path): Graph {
+  const graph = new Map(shuffleArray(list).map(item => [item.name, createNode(item)]));
 
-  shuffleArray(list).forEach(item => graph.set(item.name, createNode(item)));
-
-  const allCandidates = Array.from(graph.values());
+  const allCandidates = [...graph.values()];
 
   for (const node of graph.values()) {
     allCandidates
@@ -90,12 +53,11 @@ function initGraph(list) {
   return graph;
 }
 
+
 /**
- *
- * @param graph {Map<string, Node>}
- * @param rules {Array<[string, string]>}
+ * Apply rules to a graph
  */
-function applyOrientedRules(graph, rules) {
+export function applyOrientedRules(graph: Graph, rules: Rules): void {
   for (const [src, dest] of rules) {
     const srcNode = graph.get(src);
     const destNode = graph.get(dest);
@@ -115,7 +77,7 @@ function applyOrientedRules(graph, rules) {
  * @param graph {Map<string, Node>}
  * @param exclusions {Array<Array<string>>}
  */
-function applyExclusions(graph, exclusions) {
+export function applyExclusions(graph: Graph, exclusions): void {
   for (const exclusion of exclusions) {
     const nodes = exclusion.map(e => graph.get(e));
 
@@ -131,22 +93,19 @@ function applyExclusions(graph, exclusions) {
 }
 
 /**
- * Find a path in the graph
- *
- * @param graph {Map<string, Node>}
- * @param maxPath {number}
+ * Find a path in the graph.
  */
-function findLongestPaths(graph, maxPath = 500) {
-  const paths = [];
+export function findLongestPaths(graph: Graph, maxPath = 500): Path | undefined {
+  const paths: Array<Path> = [];
   const nodes = Array.from(graph.values());
 
   const [node] = nodes;
-  const visited = new Set();
-  const path = [];
+  const visited = new Set<Node>();
+  const path: Path = [];
   let pathIdx = 0;
   let nPath = 0;
 
-  const findAllPath = (curr, end, skipVisited) => {
+  const findAllPath = (curr: Node, end: Node, skipVisited: boolean = false) => {
     if (!skipVisited) visited.add(curr);
     path[pathIdx] = curr;
     pathIdx++;
@@ -186,12 +145,10 @@ function findLongestPaths(graph, maxPath = 500) {
 
 /**
  * console.log Pairs
- *
- * @param pairs {Array<Object>}
  */
 
 /* istanbul ignore next */
-function logPairs(pairs) {
+export function logPairs(pairs: Array<[Node, Node]>) {
   pairs
     .map(([src, dest]) => `${src.name} offre à ${dest.name}`)
     .forEach(str => console.log(str));
@@ -201,11 +158,7 @@ function logPairs(pairs) {
 async function createDraw(
   list,
   {
-    sendEmails = false,
     log = false,
-    subject,
-    content,
-    from,
     rules,
     exclusions,
   },
@@ -231,21 +184,4 @@ async function createDraw(
   if (log) {
     logPairs(pairs);
   }
-
-  if (sendEmails) {
-    const emails = createEmails(pairs, { subject, content, from });
-    await sgMail.send(emails);
-  }
 }
-
-module.exports = {
-  get,
-  applyOrientedRules,
-  applyExclusions,
-  findLongestPaths,
-  initGraph,
-  createNode,
-  createEmails,
-  createDirectedPairs,
-  createDraw,
-};

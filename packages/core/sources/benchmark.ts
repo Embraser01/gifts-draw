@@ -1,11 +1,11 @@
-const { initGraph, findLongestPaths, createDirectedPairs } = require('./index');
+import { createDirectedPairs, findLongestPaths, initGraph } from './index';
 
 const TIMES = 1000;
 const createList = size => Array.from({ length: size }, (_, idx) => ({ name: `Person ${idx}` }));
 
-function time(list, resMap) {
+function time(list, resMap): [bigint, boolean] {
   const graph = initGraph(list);
-  const start = process.hrtime.bigint();
+  const start: bigint = process.hrtime.bigint();
 
   const path = findLongestPaths(graph);
 
@@ -29,7 +29,7 @@ const formattedRes = (results) => [...results.entries()]
   .map(([key, val]) => [key, `${val}%`]);
 
 function testFor(n) {
-  let totalNanoseconds = 0n;
+  let totalNanoseconds: bigint = 0n;
   let totalPath = 0;
 
   const resMap = new Map();

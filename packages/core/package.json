@@ -1,0 +1,29 @@
+{
+  "name": "santagifts",
+  "version": "2.1.0",
+  "main": "index.js",
+  "license": "MIT",
+  "bin": "./bin/santagifts.js",
+  "homepage": "https://github.com/Embraser01/santagifts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Embraser01/santagifts.git"
+  },
+  "files": [
+    "index.js",
+    "bin/santagifts.js"
+  ],
+  "scripts": {
+    "test": "jest",
+    "build": "run build:compile",
+    "benchmark": "run build:run ./sources/benchmark.ts",
+    "start": "bin/santagifts.js"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.5",
+    "santagifts-monorepo": "workspaces:*"
+  }
+}

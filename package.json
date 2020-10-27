@@ -1,27 +1,24 @@
 {
-  "name": "santagifts",
+  "name": "santagifts-monorepo",
   "version": "2.1.0",
   "main": "index.js",
   "license": "MIT",
-  "bin": "./bin/santagifts.js",
   "homepage": "https://github.com/Embraser01/santagifts",
   "repository": {
     "type": "git",
     "url": "https://github.com/Embraser01/santagifts.git"
   },
-  "files": [
-    "index.js",
-    "bin/santagifts.js"
+  "workspaces": [
+    "packages/**"
   ],
   "scripts": {
-    "test": "jest",
-    "start": "bin/santagifts.js"
-  },
-  "dependencies": {
-    "@sendgrid/mail": "^6.4.0",
-    "dotenv": "^8.2.0"
+    "test:unit": "jest",
+    "build:compile": "cd $INIT_CWD && tsc",
+    "build:run": "cd $INIT_CWD && ts-node"
   },
   "devDependencies": {
-    "jest": "^24.9.0"
+    "jest": "^24.9.0",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.5"
   }
 }
