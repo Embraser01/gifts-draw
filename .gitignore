@@ -3,3 +3,10 @@ node_modules/
 coverage/
 
 .env
+
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
